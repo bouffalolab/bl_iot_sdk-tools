@@ -6,12 +6,12 @@ target remote :3333
 #set disassemble-next-line on
 set mem inaccessible-by-default off
 set print pretty on
-set logging on
-set logging file 602evb_gdb_run.log
+#set logging on
+#set logging file 602evb_gdb_run.log
 #mon gdb_breakpoint_override [hard|soft|disable]
 
 mem 0x22008000 0x22014000 rw
-mem 0x42008000 0x42014000 rw
+mem 0x42008000 0x42014000 ro
 mem 0x22014000 0x22020000 rw
 mem 0x42014000 0x42020000 rw
 mem 0x22020000 0x22030000 rw
@@ -20,7 +20,7 @@ mem 0x22030000 0x2204C000 rw
 mem 0x42030000 0x4204C000 rw
 mem 0x23000000 0x23400000 ro
 
-def iterList
+define iterList
      set $itemNum = $arg0.uxNumberOfItems
      set $index = $arg0.pxIndex
      set $next = $index->pxNext
@@ -224,6 +224,169 @@ define dump_aliostask
   set pagination on
 end
 
+define dump_nuttx_task
+  set pagination off
+
+  i r
+
+  # store the register
+  set $gdb_x1  = $ra
+  set $gdb_x5  = $t0
+  set $gdb_x6  = $t1
+  set $gdb_x7  = $t2
+  set $gdb_x8  = $s0
+  set $gdb_x9  = $s1
+  set $gdb_x10 = $a0
+  set $gdb_x11 = $a1
+  set $gdb_x12 = $a2
+  set $gdb_x13 = $a3
+  set $gdb_x14 = $a4
+  set $gdb_x15 = $a5
+  set $gdb_x16 = $a6
+  set $gdb_x17 = $a7
+  set $gdb_x18 = $s2
+  set $gdb_x19 = $s3
+  set $gdb_x20 = $s4
+  set $gdb_x21 = $s5
+  set $gdb_x22 = $s6
+  set $gdb_x23 = $s7
+  set $gdb_x24 = $s8
+  set $gdb_x25 = $s9
+  set $gdb_x26 = $s10
+  set $gdb_x27 = $s11
+  set $gdb_x28 = $t3
+  set $gdb_x29 = $t4
+  set $gdb_x30 = $t5
+  set $gdb_x31 = $t6
+  set $gdb_psr = $mstatus
+  set $gdb_pc  = $pc
+
+  set $gdb_pid_total = g_lastpid
+  set $gdb_i = 0
+
+  if g_current_regs != 0
+    set $ra  = g_current_regs[1]
+    set $sp  = g_current_regs[2]
+    set $gp  = g_current_regs[3]
+    set $tp  = g_current_regs[4]
+    set $t0  = g_current_regs[5]
+    set $t1  = g_current_regs[6]
+    set $t2  = g_current_regs[7]
+    set $s0  = g_current_regs[8]
+    set $s1  = g_current_regs[9]
+    set $a0  = g_current_regs[10]
+    set $a1  = g_current_regs[11]
+    set $a2  = g_current_regs[12]
+    set $a3  = g_current_regs[13]
+    set $a4  = g_current_regs[14]
+    set $a5  = g_current_regs[15]
+    set $a6  = g_current_regs[16]
+    set $a7  = g_current_regs[17]
+    set $s2  = g_current_regs[18]
+    set $s3  = g_current_regs[19]
+    set $s4  = g_current_regs[20]
+    set $s5  = g_current_regs[21]
+    set $s6  = g_current_regs[22]
+    set $s7  = g_current_regs[23]
+    set $s8  = g_current_regs[24]
+    set $s9  = g_current_regs[25]
+    set $s10 = g_current_regs[26]
+    set $s11 = g_current_regs[27]
+    set $t3  = g_current_regs[28]
+    set $t4  = g_current_regs[29]
+    set $t5  = g_current_regs[30]
+    set $t6  = g_current_regs[31]
+    set $pc  = g_current_regs[0]
+
+    bt
+  end
+
+  while ($gdb_i < $gdb_pid_total)
+
+    if g_pidhash[$gdb_i].tcb != 0
+      # print the task num
+      p $gdb_i
+
+      # get task name
+      p g_pidhash[$gdb_i].tcb.name
+
+      # set register to restore the task
+      set $ra  = g_pidhash[$gdb_i].tcb.xcp.regs[1]
+      set $sp  = g_pidhash[$gdb_i].tcb.xcp.regs[2]
+      set $gp  = g_pidhash[$gdb_i].tcb.xcp.regs[3]
+      set $tp  = g_pidhash[$gdb_i].tcb.xcp.regs[4]
+      set $t0  = g_pidhash[$gdb_i].tcb.xcp.regs[5]
+      set $t1  = g_pidhash[$gdb_i].tcb.xcp.regs[6]
+      set $t2  = g_pidhash[$gdb_i].tcb.xcp.regs[7]
+      set $s0  = g_pidhash[$gdb_i].tcb.xcp.regs[8]
+      set $s1  = g_pidhash[$gdb_i].tcb.xcp.regs[9]
+      set $a0  = g_pidhash[$gdb_i].tcb.xcp.regs[10]
+      set $a1  = g_pidhash[$gdb_i].tcb.xcp.regs[11]
+      set $a2  = g_pidhash[$gdb_i].tcb.xcp.regs[12]
+      set $a3  = g_pidhash[$gdb_i].tcb.xcp.regs[13]
+      set $a4  = g_pidhash[$gdb_i].tcb.xcp.regs[14]
+      set $a5  = g_pidhash[$gdb_i].tcb.xcp.regs[15]
+      set $a6  = g_pidhash[$gdb_i].tcb.xcp.regs[16]
+      set $a7  = g_pidhash[$gdb_i].tcb.xcp.regs[17]
+      set $s2  = g_pidhash[$gdb_i].tcb.xcp.regs[18]
+      set $s3  = g_pidhash[$gdb_i].tcb.xcp.regs[19]
+      set $s4  = g_pidhash[$gdb_i].tcb.xcp.regs[20]
+      set $s5  = g_pidhash[$gdb_i].tcb.xcp.regs[21]
+      set $s6  = g_pidhash[$gdb_i].tcb.xcp.regs[22]
+      set $s7  = g_pidhash[$gdb_i].tcb.xcp.regs[23]
+      set $s8  = g_pidhash[$gdb_i].tcb.xcp.regs[24]
+      set $s9  = g_pidhash[$gdb_i].tcb.xcp.regs[25]
+      set $s10 = g_pidhash[$gdb_i].tcb.xcp.regs[26]
+      set $s11 = g_pidhash[$gdb_i].tcb.xcp.regs[27]
+      set $t3  = g_pidhash[$gdb_i].tcb.xcp.regs[28]
+      set $t4  = g_pidhash[$gdb_i].tcb.xcp.regs[29]
+      set $t5  = g_pidhash[$gdb_i].tcb.xcp.regs[30]
+      set $t6  = g_pidhash[$gdb_i].tcb.xcp.regs[31]
+      set $pc  = g_pidhash[$gdb_i].tcb.xcp.regs[0]
+      # set $mstatus  = g_pidhash[$gdb_i].tcb.xcp.regs[32]
+
+      # print the task stack backtrace
+      bt
+    end
+
+    # go to next task
+    set $gdb_i = $gdb_i + 1
+  end
+
+  # restore the register
+  set $ra   = $gdb_x1
+  set $t0   = $gdb_x5
+  set $t1   = $gdb_x6
+  set $t2   = $gdb_x7
+  set $s0   = $gdb_x8
+  set $s1   = $gdb_x9
+  set $a0   = $gdb_x10
+  set $a1   = $gdb_x11
+  set $a2   = $gdb_x12
+  set $a3   = $gdb_x13
+  set $a4   = $gdb_x14
+  set $a5   = $gdb_x15
+  set $a6   = $gdb_x16
+  set $a7   = $gdb_x17
+  set $s2   = $gdb_x18
+  set $s3   = $gdb_x19
+  set $s4   = $gdb_x20
+  set $s5   = $gdb_x21
+  set $s6   = $gdb_x22
+  set $s7   = $gdb_x23
+  set $s8   = $gdb_x24
+  set $s9   = $gdb_x25
+  set $s10  = $gdb_x26
+  set $s11  = $gdb_x27
+  set $t3   = $gdb_x28
+  set $t4   = $gdb_x29
+  set $t5   = $gdb_x30
+  set $t6   = $gdb_x31
+  set $mstatus = $gdb_psr
+  set $pc   = $gdb_pc
+  set pagination on
+end
+
 define dump_ram
   dump binary memory ./602evb_gdb_ram.bin 0x42000000 0x42000000+0x80000
 end
@@ -237,6 +400,10 @@ end
 
 document dump_aliostask
   show info of all Rhino tasks
+end
+
+document dump_nuttx_task
+  show info of all nuttx tasks
 end
 
 document dump_freertostask
